@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Build a Blog</h1>
-<table>
+    <h1>Build a Blog</h1>
     {% for blog in blogs %}
-    <tr>{{ blog.title }}</tr>
-    <tr>{{ blog.body }}</tr>
+    <ul style="list-style-type: none">
+        <li><h2>{{ blog.title }}</h2></li>
+        <li>{{ blog.body }}</li>
+    </ul>
     {% endfor %}
-</table>
 {% endblock %}

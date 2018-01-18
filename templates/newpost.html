@@ -2,21 +2,21 @@
 
 {% block content %}
 <h1>Add a Blog Entry</h1>
-<form action="/add" method="post">
+<form action="/blog" method="post">
     <table>
         <tr>
             <td><label for="title">Title for your new blog:</label></td>
         </tr>
         <tr>
-            <td><input type="text" name="title" maxlength="120">
+            <td><input type="text" name="title" maxlength="120" value="{{ title }}">
             <span class="error">{{ title_error }}</span></td>
         </tr>
         <tr>
-            <td><label for="blog">Your new blog:</label></td>
+            <td><label for="body">Your new blog:</label></td>
         </tr>
         <tr>
-            <td><input type="text" name="blog" maxlength="500">
-            <span class="error">{{ blog_error }}</span></td>
+            <td><input type="text" name="body" maxlength="500" value="{{ body }}" style="line-height: 6">
+            <span class="error">{{ body_error }}</span></td>
         </tr>
     </table>
     <input type="submit" value="Add Blog">
