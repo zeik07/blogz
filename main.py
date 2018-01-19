@@ -47,11 +47,19 @@ def add_blog():
     new_blog = Blog(blog_title, blog_body)
     db.session.add(new_blog)
     db.session.commit()
-    return render_template('blog.html' , blogs= get_blogs())
+    
+    return render_template('entry.html' , blog= db.session.query(Blog).order_by(Blog.blog_id.desc()).first())
 
-
-@app.route("/blog", methods=['POST' , 'GET'])
+@app.route("/")
+@app.route("/blog", methods=['GET'])
 def index():
+    
+    if request.args:
+        blog_id = request.args.get("id")
+        blog = Blog.query.get(blog_id)
+
+        return render_template('entry.html' , blog=blog)
+
     return render_template('blog.html' , blogs= get_blogs())
 
 
