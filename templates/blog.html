@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Build a Blog</h1>
+    <h1>Blogz</h1>
     {% for blog in blogs %}
     <ul style="list-style-type: none">
         <li><h2><a href="/blog?id={{ blog.blog_id }}" id="{{ blog.blog_id }}">{{ blog.title }}</a></h2></li>

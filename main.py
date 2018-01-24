@@ -1,9 +1,9 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:password@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:password@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
@@ -71,48 +71,53 @@ def add_blog():
         query_param_url = "/blog?id=" + str(new_blog.id)
         return redirect(query_param_url)
 
-@app.route("/signup", methods=['POST'])
+@app.route("/signup", methods=['POST' , 'GET'])
 def signup():
-    error=False
-    username_error = ""
-    verify_error = ""
-    email_error = ""
-    username = request.form['username']
-    password = request.form['password']
-    verify = request.form['verify']
-    email = request.form['email']
-    userlist = User.query.all()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verify = request.form['verify']
 
-    if len(username) < 3:
-        username_error = "Username is too short.".format(username)
-        error=True
-    elif len(username) > 20:
-        username_error = "Username is too long.".format(username)
-        error=True
-    elif " " in username:
-        username_error = "Username can't contain a space.".format(username)
-        error=True
-    elif username in userlist:
-        username_error = "Username already exists.".format(username)
-        error=True
+        if len(username) < 3:
+            flash("Username is too short.")
+            return redirect('/signup')
+        elif len(username) > 20:
+            flash("Username is too long.")
+            return redirect('/signup')
+        elif " " in username:
+            flash("Username can't contain a space.")
+            return redirect('/signup')
 
-    if len(password) < 3 or len(password) > 20 or " " in password:
-        password_error = "Not a valid password."
-        error=True
+        user_db_count = User.query.filter_by(username=username).count()
+        if user_db_count > 0:
+            flash("Username " + username + " already exists.")
+            return redirect('/signup')
 
-    if password != verify:
-        verify_error = "Passwords do not match.".format(verify)
-        error=True
+        if len(password) < 3 or len(password) > 20 or " " in password:
+            flash("Not a valid password.")
+            return redirect('/signup')
 
-    if error == True:
-        return render_template('signup.html' , username=username , username_error=username_error , password_error=password_error , verify_error=verify_error)
+        if password != verify:
+            flash("Passwords do not match.")
+            return redirect('signup')
 
-    new_user = User(username, password)
-    db.session.add(new_user)
-    db.session.commit()
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        session['user'] = new_user.username
 
-    return render_template('newpost.html')
+        return render_template('newpost.html')
+    else:
+        return render_template('signup.html')
 
+endpoints_without_login = ['login', 'signup']
+
+@app.before_request
+def require_login():
+    if not ('user' in session or request.endpoint in endpoints_without_login):
+        return redirect("/signup")
+
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RU'
 
 if __name__ == '__main__':
     app.run()
