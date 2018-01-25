@@ -3,24 +3,21 @@
 {% block content %}
 
 <h1>Login</h1>
-    <form action="/login" method="get">
+    <form action="/login" method="post">
         <table>
             <tr>
                 <td><label for="username">Username</label></td>
                 <td>
                     <input type="text" name="username" value={{ username }}>
-                    <span class="error">{{ username_error }}</span>
-                </td>
             </tr>
             <tr>
                 <td><label for="password">Password</label></td>
                 <td>
                     <input type="password" name="password">
-                    <span class="error">{{ password_error }}</span>
                 </td>                
             </tr>
         </table>
-        <input type="submit" value="Login">
+        <input type="submit" value="Login"> | <a href="/signup">Create Account</a>
     </form>
 
     {% endblock %}

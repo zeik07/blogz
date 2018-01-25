@@ -31,13 +31,13 @@ class User(db.Model):
         self.username = username
         self.password = password        
  
-@app.route("/blog" , methods=['GET'])
-def index():
+@app.route("/blog" , methods=['GET', 'POST'])
+def blog():
     
     if request.args:
         id = request.args.get("id")
         blog = Blog.query.get(id)
-
+        
         return render_template('entry.html' , blog=blog)
     else:
         blogs = Blog.query.all()
@@ -49,22 +49,18 @@ def add_blog():
         return render_template('newpost.html')
 
     if request.method == 'POST':
-        error = False
-        title_error = ""
-        body_error = ""
         blog_title = request.form['title']
         blog_body = request.form['body']
         if len(blog_title) == 0 or len(blog_body) == 0:
             if len(blog_title) == 0:
-                error = True
-                title_error = "Must enter a title for your blog."
+                flash("Must enter a title for your blog.")
+                return redirect("/newpost", blog_body=blog_body)
             if len(blog_body) == 0:
-                error = True
-                body_error = "Must enter text for your blog."
-        if error == True:
-            return render_template('newpost.html' , title_error=title_error , body_error=body_error , title=blog_title , body=blog_body)
+                flash("Must enter text for your blog.")
+                return redirect("newpost", blog_title=blog_title)
 
-        new_blog = Blog(blog_title, blog_body)
+        owner = User.query.filter_by(username=session['user']).first()
+        new_blog = Blog(blog_title, blog_body, owner)
         db.session.add(new_blog)
         db.session.commit()
         
@@ -78,6 +74,9 @@ def signup():
         password = request.form['password']
         verify = request.form['verify']
 
+        if len(username) == 0 or len(password) == 0 or len(verify) == 0:
+            flash("One or more fields are invalid.")
+            return redirect('/signup')
         if len(username) < 3:
             flash("Username is too short.")
             return redirect('/signup')
@@ -106,16 +105,53 @@ def signup():
         db.session.commit()
         session['user'] = new_user.username
 
-        return render_template('newpost.html')
+        return redirect('/newpost')
     else:
         return render_template('signup.html')
 
-endpoints_without_login = ['login', 'signup']
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        users = User.query.filter_by(username=username)
+        if users.count() == 1:
+            user = users.first()
+            if password == user.password:
+                session['user'] = user.username
+                flash('Welcome back, ' + user.username)
+                return redirect("/newpost")
+            else:
+                flash('Incorrect password.')
+                return redirect("/login")
+        flash('Username does not exist.')
+        return redirect("/login")
+
+@app.route("/", methods=['GET', 'POST'])
+def index():
+
+    if request.args:
+        id = request.args.get("id")
+        user = User.query.get(id)
+
+        return render_template('blog.html' , user=user)
+    else:
+        users = User.query.all()
+        return render_template('index.html' , users=users)
+
+@app.route("/logout", methods=['POST'])
+def logout():
+    del session['user']
+    return redirect("/blog")
+
+endpoints_without_login = ['login', 'signup', 'index', 'blog']
 
 @app.before_request
 def require_login():
     if not ('user' in session or request.endpoint in endpoints_without_login):
-        return redirect("/signup")
+        return redirect("/login")
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RU'
 

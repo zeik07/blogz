@@ -6,14 +6,33 @@
         .error {
             color: red;
         }
-    </style>
-    <ul style="list-style-type: none">
-        <li><a href="/blog">Main Blog Page</a></li>
-        <li><a href="/newpost">Add a Blog Entry</a></li>
-        <li><a href="/signup">Signup</a></li>
-    </ul>        
+    </style>  
 </head>
 <body>
+    <div style="float: right">
+        {% if 'user' in session %}
+            <form action="/logout" method="post" id="logout">
+                {{ session['user'] }} | <input type="submit" value="Log Out" />                
+            </form>
+        {% else %}
+            <a href="login">Login</a>
+        {% endif %}
+    </div>
+
+    <div style="float: left">
+        <a href="/">Home</a> | <a href="/blog">Main Blog Page</a> | <a href="/newpost">Add a Blog Entry</a>
+    </div>
+    <br>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
     {% block content %}
     {% endblock %}
