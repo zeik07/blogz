@@ -134,9 +134,9 @@ def index():
 
     if request.args:
         id = request.args.get("id")
-        user = User.query.get(id)
-
-        return render_template('blog.html' , user=user)
+        owner = User.query.get(id)
+        blogs = Blog.query.filter_by(owner_id=owner)
+        return render_template('blog.html' , blogs=blogs , owner=owner)
     else:
         users = User.query.all()
         return render_template('index.html' , users=users)
