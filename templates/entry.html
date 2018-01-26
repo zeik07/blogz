@@ -2,8 +2,9 @@
 
 {% block content %}
 
-<h2 align="center">{{ blog.title }}</h2>
-<br>
-<p>{{ blog.body }}</p>
-
+<ul style="list-style-type: none">
+    <li><h2 align="center">{{ blog.title }}</h2></li>
+    <li>{{ blog.body }}</li>
+    <li>Written by <a href="/blog?userid={{ owner.username }}" id="{{ owner.username }}">{{ owner.username }}</a></li>
+</ul>
 {% endblock %}
